@@ -11,6 +11,7 @@
  *  regarding copyright ownership.
  */
 package org.jikesrvm.mm.mmtk;
+import static org.jikesrvm.runtime.SysCall.sysCall;
 
 import static org.jikesrvm.runtime.UnboxedSizeConstants.LOG_BYTES_IN_ADDRESS;
 
@@ -19,7 +20,7 @@ import org.jikesrvm.mm.mminterface.Selected;
 import org.jikesrvm.runtime.Magic;
 import org.jikesrvm.util.Services;
 import org.mmtk.plan.TraceLocal;
-import org.mmtk.plan.FinalizableProcessorTracer;
+import org.mmtk.plan.ProtonProcessorTracer;
 import org.vmmagic.pragma.NoInline;
 import org.vmmagic.pragma.Uninterruptible;
 import org.vmmagic.pragma.UninterruptibleNoWarn;
@@ -166,7 +167,7 @@ public final class FinalizableProcessor extends org.mmtk.vm.FinalizableProcessor
    * @param nursery Is this a nursery collection ?
    */
   @Override
-  public void forward(FinalizableProcessorTracer trace, boolean nursery) {
+  public void forward(ProtonProcessorTracer trace, boolean nursery) {
     for (int i = 0 ; i < maxIndex; i++) {
       ObjectReference ref = table.get(i).toObjectReference();
       table.set(i, trace.getForwardedFinalizable(ref).toAddress());
@@ -187,7 +188,7 @@ public final class FinalizableProcessor extends org.mmtk.vm.FinalizableProcessor
    */
   @Override
   @UninterruptibleNoWarn
-  public void scan(FinalizableProcessorTracer trace, boolean nursery) {
+  public void scan(ProtonProcessorTracer trace, boolean nursery) {
     int toIndex = nursery ? nurseryIndex : 0;
 
     for (int fromIndex = toIndex; fromIndex < maxIndex; fromIndex++) {
@@ -198,9 +199,12 @@ public final class FinalizableProcessor extends org.mmtk.vm.FinalizableProcessor
         table.set(toIndex++, trace.getForwardedFinalizable(ref).toAddress());
         continue;
       }
+    sysCall.hell_world();
+      
 
       /* Make ready for finalize */
       ref = trace.retainForFinalize(ref);
+      sysCall.hell_world();
 
       /* Add to object table */
       Offset offset = Word.fromIntZeroExtend(lastReadyIndex).lsh(LOG_BYTES_IN_ADDRESS).toOffset();

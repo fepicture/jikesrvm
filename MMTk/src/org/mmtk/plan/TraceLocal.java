@@ -16,7 +16,7 @@ import org.mmtk.policy.Space;
 import org.mmtk.utility.Log;
 import org.mmtk.utility.deque.*;
 import org.mmtk.utility.options.Options;
-import org.mmtk.plan.FinalizableProcessorTracer;
+import org.mmtk.plan.ProtonProcessorTracer;
 
 import org.mmtk.vm.VM;
 
@@ -33,7 +33,7 @@ import org.vmmagic.unboxed.*;
  * @see org.mmtk.plan.Trace
  */
 @Uninterruptible
-public abstract class TraceLocal extends TransitiveClosure implements FinalizableProcessorTracer {
+public abstract class TraceLocal extends TransitiveClosure implements ProtonProcessorTracer {
   /****************************************************************************
    *
    * Instance variables

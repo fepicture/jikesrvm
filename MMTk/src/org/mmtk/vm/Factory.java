@@ -140,6 +140,8 @@ public abstract class Factory {
    */
   public abstract FinalizableProcessor newFinalizableProcessor();
 
+  public abstract ProtonProcessor newProtonProcessor();
+
   /**
    * Create a new Scanning instance using the appropriate VM-specific
    * concrete Scanning sub-class.

@@ -146,6 +146,17 @@ public final class Factory extends org.mmtk.vm.Factory {
   }
 
   @Override
+  public org.mmtk.vm.ProtonProcessor newProtonProcessor() {
+    try {
+      return ProtonProcessor.getProcessor();
+    } catch (Exception e) {
+      VM.sysFail("Failed to allocate new ProtonProcessor!");
+      return null; // never get here
+    }
+  }
+
+
+  @Override
   public org.mmtk.vm.Scanning newScanning() {
     try {
       return new Scanning();
