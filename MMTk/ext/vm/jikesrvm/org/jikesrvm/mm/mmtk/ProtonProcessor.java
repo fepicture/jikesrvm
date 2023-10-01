@@ -18,7 +18,6 @@ import org.jikesrvm.VM;
 import org.jikesrvm.mm.mminterface.Selected;
 import org.jikesrvm.runtime.Magic;
 import org.jikesrvm.util.Services;
-import org.mmtk.plan.TraceLocal;
 import org.mmtk.plan.ProtonProcessorTracer;
 import org.mmtk.plan.Phase;
 import org.vmmagic.pragma.NoInline;
@@ -33,9 +32,9 @@ import org.vmmagic.unboxed.Word;
 import static org.jikesrvm.runtime.SysCall.sysCall;
 
 /**
- * This class manages the processing of proton objects.
- * <p>
- * TODO can this be a linked list?
+ * ProtonProcessor manages scanning and processing of different reference
+ * types during garbage collection. It acts as a router to delegate
+ * scanning to internal reference processors based on the current phase.
  */
 @Uninterruptible
 public final class ProtonProcessor extends org.mmtk.vm.ProtonProcessor {
@@ -48,13 +47,16 @@ public final class ProtonProcessor extends org.mmtk.vm.ProtonProcessor {
   private static final ProtonProcessor protonProcessor = new ProtonProcessor();
 
   public enum Phase {
-    PREPARE, 
+    PREPARE,
     SOFT_REFS,
     WEAK_REFS,
     FINALIZABLE,
     PHANTOM_REFS
   }
 
+  /**
+   * The current scanning phase.
+   */
   private static Phase phaseId;
 
   /**
@@ -65,48 +67,46 @@ public final class ProtonProcessor extends org.mmtk.vm.ProtonProcessor {
   }
 
   /**
-   * {@inheritDoc}.
-   * <p>
-   * Currently ignores the nursery hint.
-   * <p>
-   * TODO parallelise this code?
-   *
-   * @param trace   The trace
-   * @param nursery Is this a nursery collection ?
+   * Forwards references to new locations during a compacting GC.
+   * 
+   * @param trace     The tracer context
+   * @param isNursery True if scanning the nursery
    */
-
-
   @Override
   @UninterruptibleNoWarn
-  public void forward(ProtonProcessorTracer trace, boolean isNursery) {  
+  public void forward(ProtonProcessorTracer trace, boolean isNursery) {
     if (phaseId == Phase.PREPARE) {
       org.mmtk.vm.VM.finalizableProcessor.forward(trace, isNursery);
     }
   }
 
+  /**
+   * Scans references and traces reachable objects.
+   * Goes through each phase in turn, delegating scanning to the
+   * appropriate processor.
+   *
+   * @param trace      The tracer context
+   * @param isNursery  True if scanning the nursery
+   * @param needRetain Whether to retain forwarded references
+   * @return True to continue scanning or false if finished
+   */
   @Override
   @UninterruptibleNoWarn
   public boolean scan(ProtonProcessorTracer trace, boolean isNursery, boolean needRetain) {
     if (phaseId == Phase.PREPARE) {
       phaseId = Phase.SOFT_REFS;
-      // todo: may we do not need return?
-      return true;
-    } else if (phaseId == Phase.SOFT_REFS) {
+    }
+
+    if (phaseId == Phase.SOFT_REFS) {
       org.mmtk.vm.VM.softReferences.scan(trace, isNursery, needRetain);
       phaseId = Phase.WEAK_REFS;
       return true;
     } else if (phaseId == Phase.WEAK_REFS) {
-          sysCall.hell_world();
-
       org.mmtk.vm.VM.weakReferences.scan(trace, isNursery, needRetain);
-    sysCall.hell_world();
-
       phaseId = Phase.FINALIZABLE;
       return true;
     } else if (phaseId == Phase.FINALIZABLE) {
-    sysCall.hell_world();
-    org.mmtk.vm.VM.finalizableProcessor.scan(trace, isNursery);
-
+      org.mmtk.vm.VM.finalizableProcessor.scan(trace, isNursery);
       phaseId = Phase.PHANTOM_REFS;
       return true;
     } else if (phaseId == Phase.PHANTOM_REFS) {
@@ -114,7 +114,7 @@ public final class ProtonProcessor extends org.mmtk.vm.ProtonProcessor {
       phaseId = Phase.PREPARE;
       return false;
     } else {
-      // todo: throw exception
+      VM.sysFail("unreachable");
       return false;
     }
   }

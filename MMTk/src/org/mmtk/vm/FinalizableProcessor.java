@@ -13,7 +13,6 @@
 package org.mmtk.vm;
 
 import org.mmtk.plan.ProtonProcessorTracer;
-import org.mmtk.plan.TraceLocal;
 import org.vmmagic.pragma.Uninterruptible;
 
 /**

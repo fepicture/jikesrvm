@@ -11,7 +11,6 @@
  *  regarding copyright ownership.
  */
 package org.jikesrvm.mm.mmtk;
-import static org.jikesrvm.runtime.SysCall.sysCall;
 
 import static org.jikesrvm.runtime.UnboxedSizeConstants.LOG_BYTES_IN_ADDRESS;
 
@@ -19,7 +18,6 @@ import org.jikesrvm.VM;
 import org.jikesrvm.mm.mminterface.Selected;
 import org.jikesrvm.runtime.Magic;
 import org.jikesrvm.util.Services;
-import org.mmtk.plan.TraceLocal;
 import org.mmtk.plan.ProtonProcessorTracer;
 import org.vmmagic.pragma.NoInline;
 import org.vmmagic.pragma.Uninterruptible;
@@ -92,7 +90,6 @@ public final class FinalizableProcessor extends org.mmtk.vm.FinalizableProcessor
    *
    * @param object the object to add to the table of candidates
    */
-
   @NoInline
   @UnpreemptibleNoWarn("Non-preemptible but yield when table needs to be grown")
   public void add(Object object) {
@@ -199,12 +196,9 @@ public final class FinalizableProcessor extends org.mmtk.vm.FinalizableProcessor
         table.set(toIndex++, trace.getForwardedFinalizable(ref).toAddress());
         continue;
       }
-    sysCall.hell_world();
-      
 
       /* Make ready for finalize */
       ref = trace.retainForFinalize(ref);
-      sysCall.hell_world();
 
       /* Add to object table */
       Offset offset = Word.fromIntZeroExtend(lastReadyIndex).lsh(LOG_BYTES_IN_ADDRESS).toOffset();

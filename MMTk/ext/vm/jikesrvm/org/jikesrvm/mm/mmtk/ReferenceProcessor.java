@@ -12,7 +12,6 @@
  */
 package org.jikesrvm.mm.mmtk;
 
-import org.mmtk.plan.TraceLocal;
 import org.mmtk.plan.ProtonProcessorTracer;
 import org.mmtk.utility.options.Options;
 

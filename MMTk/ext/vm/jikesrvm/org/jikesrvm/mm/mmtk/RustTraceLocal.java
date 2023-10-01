@@ -32,11 +32,11 @@ public final class RustTraceLocal implements ProtonProcessorTracer {
     }
 
     public ObjectReference getForwardedFinalizable(ObjectReference object) {
-        return sysCall.get_forwarded_object(object); // ObjectReference::get_forwarded_object
+        return sysCall.get_forwarded_object(object);
     }
 
     public ObjectReference getForwardedReferent(ObjectReference object) {
-        return sysCall.get_forwarded_object(object); // ObjectReference::get_forwarded_object
+        return sysCall.get_forwarded_object(object);
     }
 
     public ObjectReference getForwardedReference(ObjectReference object) {

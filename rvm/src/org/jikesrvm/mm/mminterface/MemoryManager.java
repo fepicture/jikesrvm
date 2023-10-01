@@ -1180,11 +1180,7 @@ public final class MemoryManager {
    */
   @Interruptible
   public static void addSoftReference(SoftReference<?> obj, Object referent) {
-    // if (VM.BuildWithRustMMTk) {
-    //   sysCall.sysAddSoftCandidate(obj, ObjectReference.fromObject(referent));
-    // } else {
       ReferenceProcessor.addSoftCandidate(obj, ObjectReference.fromObject(referent));
-    // }
   }
 
   /**
@@ -1195,11 +1191,7 @@ public final class MemoryManager {
    */
   @Interruptible
   public static void addWeakReference(WeakReference<?> obj, Object referent) {
-    // if (VM.BuildWithRustMMTk) {
-      // sysCall.sysAddWeakCandidate(obj, ObjectReference.fromObject(referent));
-    // } else {
       ReferenceProcessor.addWeakCandidate(obj, ObjectReference.fromObject(referent));
-    //}
   }
 
   /**
@@ -1210,21 +1202,11 @@ public final class MemoryManager {
    */
   @Interruptible
   public static void addPhantomReference(PhantomReference<?> obj, Object referent) {
-    // if (VM.BuildWithRustMMTk) {
-    //   sysCall.sysAddPhantomCandidate(obj, ObjectReference.fromObject(referent));
-    // } else {
       ReferenceProcessor.addPhantomCandidate(obj, ObjectReference.fromObject(referent));
-    // }
-  }
-
-  @Entrypoint
-  public static void swift() {
-    VM.sysWriteln("[java] repos/j/rvm/src/org/j/mm/mminter/memorymanager.java:swift");
   }
 
   @Entrypoint
   public static boolean doProtonProcessorScan(Address traceObjectCallback, Address tracer, boolean isNursery, boolean needRetain) {
-    // sysCall.hell_world();
     return org.mmtk.vm.VM.protonProcessor.scan(new RustTraceLocal(traceObjectCallback, tracer), isNursery, needRetain);
   }
 

@@ -13,34 +13,41 @@
 package org.mmtk.vm;
 
 import org.mmtk.plan.ProtonProcessorTracer;
-import org.mmtk.plan.TraceLocal;
 import org.vmmagic.pragma.Uninterruptible;
-  //  fix me 
-/*
- * repos/jikesrvm/MMTk/src/org/mmtk/vm/ProtonProcessor.java:18: error: package org.jikesrvm.mm.mmtk does not exist
-    [javac] import org.jikesrvm.mm.mmtk.RustTraceLocal
- */
 
 /**
- * This class manages Proton objects.
+ * Abstract base class for scanning and processing reference
+ * objects during garbage collection.
+ *
+ * Subclasses implement scanning and forwarding logic for 
+ * different reference types.
  */
 @Uninterruptible
 public abstract class ProtonProcessor {
 
-  public abstract boolean scan(ProtonProcessorTracer trace, boolean isNursery, boolean needRetain);
-
   /**
-   * Iterates over and forward entries in the table.
+   * Scans reference objects and enqueues reachable objects.
    *
-   * @param trace the trace to use for the processing of the references
-   * @param nursery if {@code true}, scan only references generated since
-   *  last scan. Otherwise, scan all references.
+   * Implementations should scan a specific reference type.
+   *
+   * @param trace Tracer context
+   * @param isNursery If scanning nursery
+   * @param needRetain If should retain forwarded references
+   * @return True to continue scanning
    */
-  public abstract void forward(ProtonProcessorTracer trace, boolean isNursery);
-  // @Override fix me 
-/*
- * repos/jikesrvm/MMTk/src/org/mmtk/vm/ProtonProcessor.java:18: error: package org.jikesrvm.mm.mmtk does not exist
-    [javac] import org.jikesrvm.mm.mmtk.RustTraceLocal
- */
+  public abstract boolean scan(ProtonProcessorTracer trace, 
+                               boolean isNursery, 
+                               boolean needRetain);
+                               
+  /**
+   * Forwards reference objects to new locations.
+   * 
+   * Implementations should forward a specific reference type.
+   *
+   * @param trace Tracer context
+   * @param isNursery If scanning nursery
+   */
+  public abstract void forward(ProtonProcessorTracer trace, 
+                               boolean isNursery);
 
 }
