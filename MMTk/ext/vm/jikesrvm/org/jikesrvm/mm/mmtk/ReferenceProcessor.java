@@ -475,6 +475,7 @@ public final class ReferenceProcessor extends org.mmtk.vm.ReferenceProcessor {
      * If the reference is dead, we're done with it. Let it (and
      * possibly its referent) be garbage-collected.
      */
+    // VM._assert(DebugUtil.validRef(reference));
     if (!trace.isLive(reference)) {
       clearReferent(reference);                   // Too much paranoia ...
       if (TRACE_UNREACHABLE) {
